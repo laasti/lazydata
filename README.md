@@ -63,7 +63,7 @@ $viewdata->get('viewdata_callable_args_key');
 
 ```
 
-The ContainerResolver falls back on the default resolver if it cannot resolver the call.
+The ContainerResolver falls back on the default resolver if it cannot resolve the call.
 
 > **Note:**
 > Does not work with league/container invokables. It is a limitation due to the way registered callables are stored,
