@@ -9,7 +9,6 @@
         }
     ],
     "require": {
-        "dflydev/dot-access-data": "~1.0"
     },
     "require-dev": {
         "league/container": "~1.3"

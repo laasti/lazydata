@@ -23,16 +23,19 @@ class ContainerResolver implements ResolverInterface
      */
     protected $container;
 
+    protected $prefix;
+
     /**
      * Constructor
      * @param ContainerInterface $container
      * @param ResolverInterface $fallback
      */
     public function __construct(ContainerInterface $container,
-            ResolverInterface $fallback = null)
+            ResolverInterface $fallback = null, $prefix = '=')
     {
         $this->container = $container;
-        $this->fallback = $fallback ? : new CallableResolver;
+        $this->prefix = $prefix;
+        $this->fallback = $fallback ? : new CallableResolver($prefix);
     }
 
     /**
@@ -80,17 +83,33 @@ class ContainerResolver implements ResolverInterface
     private function getCallable($value)
     {
         if (is_string($value)) {
-            return [strpos($value, '::') ? explode('::', $value) : $value];
-        } else if (is_array($value) && count($value) === 1) {
-            return [strpos($value[0], '::') ? explode('::', $value[0]) : $value[0]];
-        } else if (is_array($value) && count($value) === 2 && is_array($value[1])) {
-            return [strpos($value[0], '::') ? explode('::', $value[0]) : $value[0], $value[1]];
-        } else if (is_array($value) && count($value) === 2) {
-            return [$value];
-        } else if (is_array($value) && count($value) === 3) {
-            return [[$value[0], $value[1]], $value[2]];
+            return $this->validateCallable([strpos($value, '::') ? explode('::', $value) : $value]);
+        } else if (is_array($value) && count($value) === 1 && isset($value[0])) {
+            return $this->validateCallable([strpos($value[0], '::') ? explode('::', $value[0]) : $value[0]]);
+        } else if (is_array($value) && count($value) === 2 && isset($value[0]) && isset($value[1]) && is_array($value[1])) {
+            return $this->validateCallable([strpos($value[0], '::') ? explode('::', $value[0]) : $value[0], $value[1]]);
+        } else if (is_array($value) && count($value) === 2 && isset($value[0]) && isset($value[1])) {
+            return $this->validateCallable([$value]);
+        } else if (is_array($value) && count($value) === 3 && isset($value[0]) && isset($value[1]) && isset($value[2])) {
+            return $this->validateCallable([[$value[0], $value[1]], $value[2]]);
         }
         return false;
     }
 
+    private function validateCallable($callable)
+    {
+        if (is_string($callable[0]) && strpos($callable[0], $this->prefix) === 0) {
+            $callable[0] = preg_replace('/^'.$this->prefix.'/', '', $callable[0]);
+            return $callable;
+        } elseif (is_array($callable[0]) && is_string($callable[0][0]) && strpos($callable[0][0], $this->prefix) === 0) {
+            $callable[0][0] = preg_replace('/^'.$this->prefix.'/', '', $callable[0][0]);
+            return $callable;
+        } elseif (is_array($callable[0]) && is_object($callable[0][0])) {
+            return $callable;
+        } elseif (is_object($callable[0])) {
+            return $callable;
+        }
+
+        return false;
+    }
 }

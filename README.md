@@ -2,8 +2,6 @@
 
 Provides lazy loading of data to views. Dot notation can be used.
 
-Requires dflydev/dot-access-data to enable the use of dot notation to add data.
-
 ## Installation
 
 ```
@@ -20,8 +18,9 @@ Without League\Container:
 
 $data = [
     'title' => 'render_title',
-    'with_arguments' => ['my_callable', [/* args here */]],
-    'with_class' => ['my_class', 'my_function'], //or 'my_class::my_function',
+    'with_arguments' => ['=my_callable', [/* args here */]],
+    'with_class' => ['=my_class', 'my_function'], //or '=my_class::my_function',
+    'with_object' => [$object, 'my_function'],
     'meta' => function() {
         return [
             'description' => 'My description'
@@ -50,15 +49,15 @@ $viewdata = $container->get('Laasti\Lazydata\Data);;
 
 $container->add('container_key', 'some value');
 
-$viewdata->set('viewdata_key', 'container_key');
+$viewdata->set('viewdata_key', '=container_key');
 $viewdata->get('viewdata_key'); //Returns 'some value'
 
 //Returns the value from SomeClass->myMethod();, SomeClass is resolved with the container
-$viewdata->set('viewdata_callable_key', 'SomeClass::myMethod');
+$viewdata->set('viewdata_callable_key', '=SomeClass::myMethod');
 $viewdata->get('viewdata_callable_key');
 
 //Returns the value from SomeClass->myMethod('George'); SomeClass is resolved with the container
-$viewdata->set('viewdata_callable_args_key', ['SomeClass::myMethod', ['George']]);
+$viewdata->set('viewdata_callable_args_key', ['=SomeClass::myMethod', ['George']]);
 $viewdata->get('viewdata_callable_args_key');
 
 ```

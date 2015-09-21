@@ -26,7 +26,8 @@ class DataTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($viewdata->get('string') === 'MyTest');
         $this->assertTrue($viewdata->get('number') === 0);
         $this->assertTrue($viewdata->get('boolean') === false);
-        $this->assertTrue($viewdata->get('array') === ['key', 'key2']);
+        //TODO what of protected keywords
+        $this->assertTrue($viewdata->get('array')->toArray() === ['key', 'key2']);
         $this->assertTrue($viewdata->get('object')->property === 'testProperty');
         $this->assertTrue($viewdata->get('notfound') === null);
     }
@@ -37,13 +38,13 @@ class DataTest extends \PHPUnit_Framework_TestCase
         $obj = new CallableObject;
         $inv = new InvokableObject;
         $data = [
-            'function' => 'functionCallable',
-            'function_array' => ['functionCallable'],
-            'function_param' => ['functionCallable', ['my name']],
-            'static_short' => 'StaticCallable::get',
-            'static_short_array' => ['StaticCallable::get'],
-            'static_short_param' => ['StaticCallable::get', ['my name']],
-            'static' => ['StaticCallable', 'get', ['my name']],
+            'function' => '=functionCallable',
+            'function_array' => ['=functionCallable'],
+            'function_param' => ['=functionCallable', ['my name']],
+            'static_short' => '=StaticCallable::get',
+            'static_short_array' => ['=StaticCallable::get'],
+            'static_short_param' => ['=StaticCallable::get', ['my name']],
+            'static' => ['=StaticCallable', 'get', ['my name']],
             'object' => [$obj, 'get'],
             'object_direct' => $obj,
             'object_param' => [$obj, 'get', ['my name']],
@@ -101,21 +102,21 @@ class DataTest extends \PHPUnit_Framework_TestCase
                 $container->addServiceProvider($provider);
                 $data = [
                     0 => 'test',
-                    'string' => 'config_string',
-                    'array' => 'config_array',
-                    'callable' => 'my_callable',
-                    'object' => 'some_class::get',
-                    'object_direct' => 'some_class',
-                    'object_array' => ['some_class', 'get'],
-                    'object_array2' => ['some_class::get'],
-                    'object_params' => ['some_class::get', ['name']],
-                    'object_params_array' => ['some_class', 'get', ['name']],
-                    'provided' => 'provided_class::get',
-                    'provided_array' => ['provided_class', 'get'],
-                    'provided_params' => ['provided_class::get', ['name']],
-                    'reflection' => 'CallableObject::get',
-                    'invokable' => ['InvokableObject', ['name']],
-                    'provided_params_array' => ['provided_class', 'get', ['name']],
+                    'string' => '=config_string',
+                    'array' => '=config_array',
+                    'callable' => '=my_callable',
+                    'object' => '=some_class::get',
+                    'object_direct' => '=some_class',
+                    'object_array' => ['=some_class', 'get'],
+                    'object_array2' => ['=some_class::get'],
+                    'object_params' => ['=some_class::get', ['name']],
+                    'object_params_array' => ['=some_class', 'get', ['name']],
+                    'provided' => '=provided_class::get',
+                    'provided_array' => ['=provided_class', 'get'],
+                    'provided_params' => ['=provided_class::get', ['name']],
+                    'reflection' => '=CallableObject::get',
+                    'invokable' => ['=InvokableObject', ['name']],
+                    'provided_params_array' => ['=provided_class', 'get', ['name']],
                 ];
                 $viewdata = new Data($data, new ContainerResolver($container));
 
