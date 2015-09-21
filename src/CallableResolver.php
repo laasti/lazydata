@@ -39,16 +39,15 @@ class CallableResolver implements ResolverInterface
      */
     private function getCallable($value)
     {
-
         if (is_callable($value)) {
             return [$value];
-        } elseif (is_array($value) && count($value) === 1 && is_callable($value[0])) {
+        } elseif (is_array($value) && count($value) === 1 && isset($value[0]) && is_callable($value[0])) {
             return $value;
-        } elseif (is_array($value) && count($value) === 2 && is_array($value[1])) {
+        } elseif (is_array($value) && count($value) === 2 && isset($value[1]) && is_array($value[1])) {
             if (is_array($value[1]) && is_callable($value[0])) {
                 return $value;
             }
-        } elseif (is_array($value) && count($value) === 3 && is_callable([$value[0], $value[1]])) {
+        } elseif (is_array($value) && count($value) === 3 && isset($value[0]) && isset($value[1]) && is_callable([$value[0], $value[1]])) {
             return [[$value[0], $value[1]], $value[2]];
         }
 
