@@ -51,8 +51,8 @@ class DataTest extends \PHPUnit_Framework_TestCase
             'object_param_required' => [$obj, 'getParam'],
             'invokable' => [$inv, ['my name']],
             'closure' => function() {
-                return 'Closure';
-            },
+        return 'Closure';
+    },
             'dot' => [
                 'notation' => [
                     'closure' => function() {
@@ -136,6 +136,43 @@ class DataTest extends \PHPUnit_Framework_TestCase
                 $this->assertTrue($viewdata->get('provided_params_array') === 'object name');
                 $this->assertTrue($viewdata->get('reflection') === 'object default');
                 $this->assertTrue($viewdata->get('invokable') === 'invoke name');
+            }
+
+            public function testFilterResolver()
+            {
+                $data = [
+                    'native' => 'strtoupper:test',
+                    'closure' => 'closure:Test',
+                    'unset'  => 'unset:Test'
+                ];
+                $resolver = new \Laasti\Lazydata\FilterResolver;
+                $resolver->setFilter('closure', function() {
+                    return 'My closure';
+                });
+                $resolver->setFilter('unset', function() {
+                    return 'My closure2';
+                });
+                $resolver->removeFilter('unset');
+                $viewdata = new Data($data, $resolver);
+                $this->assertTrue($viewdata->get('native') === 'TEST');
+                $this->assertTrue($viewdata->get('closure') === 'My closure');
+                $this->assertTrue($viewdata->get('unset') === 'unset:Test');
+            }
+
+            public function testInvalidKey()
+            {
+                $this->setExpectedException('InvalidArgumentException');
+                $resolver = new \Laasti\Lazydata\FilterResolver;
+                $resolver->setFilter('bcu&62-', function() {
+                    return 'My closure';
+                });
+            }
+
+            public function testInvalidCallable()
+            {
+                $this->setExpectedException('InvalidArgumentException');
+                $resolver = new \Laasti\Lazydata\FilterResolver;
+                $resolver->setFilter('mycallable', 'some_invalid_function');
             }
 
         }

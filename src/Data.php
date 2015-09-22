@@ -10,6 +10,7 @@ class Data implements \ArrayAccess
 {
 
     protected $data;
+    protected $resolver;
 
     public function __construct($initialData = [], ResolverInterface $resolver = null)
     {
@@ -173,4 +174,16 @@ class Data implements \ArrayAccess
     {
         return $this->get($property);
     }
+
+    public function getResolver()
+    {
+        return $this->resolver;
+    }
+
+    public function setResolver($resolver)
+    {
+        $this->resolver = $resolver;
+        return $this;
+    }
+
 }

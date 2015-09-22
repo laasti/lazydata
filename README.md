@@ -36,6 +36,24 @@ $viewdata->get('meta.description'); //Returns 'My description'
 
 ```
 
+Using filters, you can define your own filter with `setFilter` or use native PHP functions that take one string argument.
+
+```php
+    $data = [
+        'native_example' => 'strtoupper:test', //I know, it's a stupid example :P
+        'closure_example' => 'closure:Test',
+    ];
+    $resolver = new \Laasti\Lazydata\FilterResolver;
+    $resolver->setFilter('closure', function($value) {
+        return md5($value.'MYSALT');
+    });
+    $viewdata = new Laasti\Lazydata\Data($data, $resolver);
+
+    $viewdata->get('native_example'); //Returns 'TEST'
+    $viewdata->get('closure_example'); //Returns '56e29f03228697ad59822c71eb4d7750'
+
+```
+
 With league/container:
 
 ```php
