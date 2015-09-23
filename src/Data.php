@@ -45,7 +45,20 @@ class Data implements \ArrayAccess
         //Create a new resolver in case of nested lazydata
         if (is_array($resolvableValue) || $resolvableValue instanceof \ArrayAccess) {
             $class = __CLASS__;
-            $resolvableValue = new $class($resolvableValue, $this->resolver);
+            $i = 0;
+            $isAssoc = false;
+            foreach ($resolvableValue as $key => $value) {
+                if ($key !== $i) {
+                    $isAssoc = true;
+                    break;
+                }
+				$i++;
+            }
+            if ($isAssoc) {
+                $resolvableValue = new $class($resolvableValue, $this->resolver);
+            } else {
+                $resolvableValue = new IterableData($resolvableValue, $this->resolver);
+            }
         }
 
         return is_null($resolvableValue) ? $default : $resolvableValue;
@@ -156,7 +169,7 @@ class Data implements \ArrayAccess
 
     public function offsetExists($property)
     {
-        $random = uniqid('DATA');
+        $random = uniqid('DATA');  
         return $this->get($property, $random) !== $random;
     }
 

@@ -68,10 +68,10 @@ class CallableResolver implements ResolverInterface
         if (is_string($callable[0]) && strpos($callable[0], $this->prefix) === 0) {
             $callable[0] = preg_replace('/^'.$this->prefix.'/', '', $callable[0]);
             return $callable;
-        } elseif (is_array($callable[0]) && is_string($callable[0][0]) && strpos($callable[0][0], $this->prefix) === 0) {
+        } elseif (is_array($callable[0]) && isset($callable[0][0]) && is_string($callable[0][0]) && strpos($callable[0][0], $this->prefix) === 0) {
             $callable[0][0] = preg_replace('/^'.$this->prefix.'/', '', $callable[0][0]);
             return $callable;
-        } elseif (is_array($callable[0]) && is_object($callable[0][0])) {
+        } elseif (is_array($callable[0]) && isset($callable[0][0]) && is_object($callable[0][0])) {
             return $callable;
         } elseif (is_object($callable[0])) {
             return $callable;

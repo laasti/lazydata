@@ -84,9 +84,9 @@ class ContainerResolver implements ResolverInterface
     {
         if (is_string($value)) {
             return $this->validateCallable([strpos($value, '::') ? explode('::', $value) : $value]);
-        } else if (is_array($value) && count($value) === 1 && isset($value[0])) {
+        } else if (is_array($value) && count($value) === 1 && isset($value[0]) && is_string($value[0])) {
             return $this->validateCallable([strpos($value[0], '::') ? explode('::', $value[0]) : $value[0]]);
-        } else if (is_array($value) && count($value) === 2 && isset($value[0]) && isset($value[1]) && is_array($value[1])) {
+        } else if (is_array($value) && count($value) === 2 && isset($value[0]) && is_string($value[0]) && isset($value[1]) && is_array($value[1])) {
             return $this->validateCallable([strpos($value[0], '::') ? explode('::', $value[0]) : $value[0], $value[1]]);
         } else if (is_array($value) && count($value) === 2 && isset($value[0]) && isset($value[1])) {
             return $this->validateCallable([$value]);
