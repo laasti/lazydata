@@ -14,8 +14,8 @@ class Data implements \ArrayAccess
 
     public function __construct($initialData = [], ResolverInterface $resolver = null)
     {
-        $this->data = $initialData;
-        $this->resolver = $resolver ?: new CallableResolver;
+        $this->resolver = $resolver ? : new CallableResolver;
+        $this->add($initialData);
     }
 
     /**
@@ -25,7 +25,7 @@ class Data implements \ArrayAccess
     {
         $keyPath = explode('.', $property);
         $resolvableValue = $this->data;
-        for ( $i = 0; $i < count($keyPath); $i++ ) {
+        for ($i = 0; $i < count($keyPath); $i++) {
             $currentKey = $keyPath[$i];
             if ((is_array($resolvableValue) || $resolvableValue instanceof \ArrayAccess) && isset($resolvableValue[$currentKey])) {
                 $resolvableValue = $resolvableValue[$currentKey];
@@ -39,7 +39,7 @@ class Data implements \ArrayAccess
                 }
             }
         }
-        
+
         $resolvableValue = $this->resolver->resolve($resolvableValue);
 
         //Create a new resolver in case of nested lazydata
@@ -52,7 +52,7 @@ class Data implements \ArrayAccess
                     $isAssoc = true;
                     break;
                 }
-				$i++;
+                $i++;
             }
             if ($isAssoc) {
                 $resolvableValue = new $class($resolvableValue, $this->resolver);
@@ -70,14 +70,14 @@ class Data implements \ArrayAccess
     public function set($property, $value)
     {
         $keyPath = explode('.', $property);
-        $resolvableValue =& $this->data;
+        $resolvableValue = & $this->data;
 
         $end = array_pop($keyPath);
-        for ( $i = 0; $i < count($keyPath); $i++ ) {
+        for ($i = 0; $i < count($keyPath); $i++) {
             $currentKey = $keyPath[$i];
             if (!is_array($resolvableValue) || !$resolvableValue instanceof \ArrayAccess || !isset($resolvableValue[$currentKey])) {
                 $result = $this->resolver->resolve($resolvableValue, null);
-                
+
                 if ($result === null) {
                     $resolvableValue[$currentKey] = array();
                 } else {
@@ -86,12 +86,12 @@ class Data implements \ArrayAccess
             }
 
             if (!isset($resolvableValue[$currentKey])) {
-                throw new \RuntimeException('Trying to set data into a non-array property: "'.$property.'".');
+                throw new \RuntimeException('Trying to set data into a non-array property: "' . $property . '".');
             }
 
-            $resolvableValue =& $resolvableValue[$currentKey];
+            $resolvableValue = & $resolvableValue[$currentKey];
         }
-        
+
         $resolvableValue[$end] = $value;
 
         return $this;
@@ -103,7 +103,7 @@ class Data implements \ArrayAccess
     public function remove($property)
     {
 
-        $data =& $this->data;
+        $data = & $this->data;
         $keyPath = explode('.', $property);
 
         if (1 === count($keyPath)) {
@@ -112,12 +112,12 @@ class Data implements \ArrayAccess
         }
 
         $end = array_pop($keyPath);
-        for ( $i = 0; $i < count($keyPath); $i++ ) {
-            $currentKey =& $keyPath[$i];
+        for ($i = 0; $i < count($keyPath); $i++) {
+            $currentKey = & $keyPath[$i];
             if (!isset($data[$currentKey])) {
                 return $this;
             }
-            $currentValue =& $currentValue[$currentKey];
+            $currentValue = & $currentValue[$currentKey];
         }
         unset($currentValue[$end]);
 
@@ -125,12 +125,17 @@ class Data implements \ArrayAccess
     }
 
     /**
-     * {@inheritdoc}
+     * Add data in batch from an array
+     * @param array $data
+     * @param bool $overwrite
+     * @return \Laasti\Lazydata\Data
      */
-    public function add($data)
+    public function add($data, $overwrite = true)
     {
         foreach ($data as $property => $value) {
-            $this->set($property, $value);
+            if ($overwrite || !$this->offsetExists($property)) {
+                $this->set($property, $value);
+            }
         }
         return $this;
     }
@@ -140,13 +145,13 @@ class Data implements \ArrayAccess
      */
     public function push($property, $value)
     {
-        $data =& $this->get($property);
+        $data = & $this->get($property);
         if (is_array($data) || $data instanceof \ArrayAccess) {
             $data[] = $value;
             return $this;
         }
 
-        throw new \RuntimeException('Trying to push data into an undefined or a non-array property: "'.$property.'".');
+        throw new \RuntimeException('Trying to push data into an undefined or a non-array property: "' . $property . '".');
     }
 
     /**
@@ -169,7 +174,7 @@ class Data implements \ArrayAccess
 
     public function offsetExists($property)
     {
-        $random = uniqid('DATA');  
+        $random = uniqid('DATA');
         return $this->get($property, $random) !== $random;
     }
 
