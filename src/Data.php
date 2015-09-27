@@ -6,7 +6,7 @@ namespace Laasti\Lazydata;
  * Data Class
  *
  */
-class Data implements \ArrayAccess
+class Data implements \ArrayAccess, \JsonSerializable
 {
 
     protected $data;
@@ -21,7 +21,7 @@ class Data implements \ArrayAccess
     /**
      * {@inheritdoc}
      */
-    public function get($property, $default = null)
+    public function get($property, $default = null, $wrapInResolver = true)
     {
         $keyPath = explode('.', $property);
         $resolvableValue = $this->data;
@@ -202,6 +202,26 @@ class Data implements \ArrayAccess
     {
         $this->resolver = $resolver;
         return $this;
+    }
+
+    public function jsonSerialize($data = null)
+    {
+        $data = $data ?: $this->data;
+
+        if (is_null($data)) {
+            return null;
+        }
+
+        $exportData = [];
+        foreach ($data as $key => $value) {
+            $exportData[$key] = $this->get($key, null, false);
+
+            if (is_array($exportData[$key])) {
+                $exportData[$key] = $this->jsonSerialize($exportData[$key]);
+            }
+        }
+
+        return $exportData;
     }
 
 }
