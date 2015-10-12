@@ -9,7 +9,7 @@ namespace Laasti\Lazydata;
 class Data implements \ArrayAccess, \JsonSerializable
 {
 
-    protected $data;
+    protected $data = [];
     protected $resolver;
 
     public function __construct($initialData = [], ResolverInterface $resolver = null)
