@@ -30,7 +30,7 @@ class Data implements \ArrayAccess, \JsonSerializable
             if ((is_array($resolvableValue) || $resolvableValue instanceof \ArrayAccess) && isset($resolvableValue[$currentKey])) {
                 $resolvableValue = $resolvableValue[$currentKey];
             } else {
-                $random = uniqid('DATA_GET');
+                $random = uniqid('DATA_GET', true);
                 $result = $this->resolver->resolve($resolvableValue, $random);
                 if ((is_array($result) || $result instanceof \ArrayAccess) && isset($result[$currentKey])) {
                     $resolvableValue = $result[$currentKey];
@@ -174,7 +174,7 @@ class Data implements \ArrayAccess, \JsonSerializable
 
     public function offsetExists($property)
     {
-        $random = uniqid('DATA');
+        $random = uniqid('DATA', true);
         return $this->get($property, $random) !== $random;
     }
 
