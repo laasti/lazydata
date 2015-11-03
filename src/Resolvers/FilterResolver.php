@@ -1,6 +1,6 @@
 <?php
 
-namespace Laasti\Lazydata;
+namespace Laasti\Lazydata\Resolvers;
 
 use InvalidArgumentException;
 

@@ -1,13 +1,11 @@
 <?php
 
+
 namespace Laasti\Lazydata\Tests;
 
-use CallableObject;
-use InvokableObject;
-use Laasti\Lazydata\ContainerResolver;
 use Laasti\Lazydata\Data;
+use Laasti\Lazydata\Resolvers\ContainerResolver;
 use League\Container\Container;
-
 /**
  * DataTest Class
  *
@@ -35,8 +33,8 @@ class DataTest extends \PHPUnit_Framework_TestCase
     public function testCallableResolver()
     {
         require 'dummy-callables.php';
-        $obj = new CallableObject;
-        $inv = new InvokableObject;
+        $obj = new \CallableObject;
+        $inv = new \InvokableObject;
         $data = [
             'function' => '=functionCallable',
             'function_array' => ['=functionCallable'],
@@ -145,7 +143,7 @@ class DataTest extends \PHPUnit_Framework_TestCase
                     'closure' => 'closure:Test',
                     'unset'  => 'unset:Test'
                 ];
-                $resolver = new \Laasti\Lazydata\FilterResolver;
+                $resolver = new \Laasti\Lazydata\Resolvers\FilterResolver;
                 $resolver->setFilter('closure', function() {
                     return 'My closure';
                 });
@@ -162,7 +160,7 @@ class DataTest extends \PHPUnit_Framework_TestCase
             public function testInvalidKey()
             {
                 $this->setExpectedException('InvalidArgumentException');
-                $resolver = new \Laasti\Lazydata\FilterResolver;
+                $resolver = new \Laasti\Lazydata\Resolvers\FilterResolver;
                 $resolver->setFilter('bcu&62-', function() {
                     return 'My closure';
                 });
@@ -171,7 +169,7 @@ class DataTest extends \PHPUnit_Framework_TestCase
             public function testInvalidCallable()
             {
                 $this->setExpectedException('InvalidArgumentException');
-                $resolver = new \Laasti\Lazydata\FilterResolver;
+                $resolver = new \Laasti\Lazydata\Resolvers\FilterResolver;
                 $resolver->setFilter('mycallable', 'some_invalid_function');
             }
 

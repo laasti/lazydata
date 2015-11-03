@@ -2,11 +2,16 @@
 
 namespace Laasti\Lazydata;
 
+use ArrayAccess;
+use JsonSerializable;
+use Laasti\Lazydata\Resolvers\CallableResolver;
+use Laasti\Lazydata\Resolvers\ResolverInterface;
+use RuntimeException;
 /**
  * Data Class
  *
  */
-class Data implements \ArrayAccess, \JsonSerializable
+class Data implements ArrayAccess, JsonSerializable
 {
 
     protected $data = [];
@@ -27,12 +32,12 @@ class Data implements \ArrayAccess, \JsonSerializable
         $resolvableValue = $this->data;
         for ($i = 0; $i < count($keyPath); $i++) {
             $currentKey = $keyPath[$i];
-            if ((is_array($resolvableValue) || $resolvableValue instanceof \ArrayAccess) && isset($resolvableValue[$currentKey])) {
+            if ((is_array($resolvableValue) || $resolvableValue instanceof ArrayAccess) && isset($resolvableValue[$currentKey])) {
                 $resolvableValue = $resolvableValue[$currentKey];
             } else {
                 $random = uniqid('DATA_GET', true);
                 $result = $this->resolver->resolve($resolvableValue, $random);
-                if ((is_array($result) || $result instanceof \ArrayAccess) && isset($result[$currentKey])) {
+                if ((is_array($result) || $result instanceof ArrayAccess) && isset($result[$currentKey])) {
                     $resolvableValue = $result[$currentKey];
                 } else {
                     return $default;
@@ -43,7 +48,7 @@ class Data implements \ArrayAccess, \JsonSerializable
         $resolvableValue = $this->resolver->resolve($resolvableValue);
 
         //Create a new resolver in case of nested lazydata
-        if (is_array($resolvableValue) || $resolvableValue instanceof \ArrayAccess) {
+        if (is_array($resolvableValue) || $resolvableValue instanceof ArrayAccess) {
             $class = __CLASS__;
             $i = 0;
             $isAssoc = false;
@@ -75,7 +80,7 @@ class Data implements \ArrayAccess, \JsonSerializable
         $end = array_pop($keyPath);
         for ($i = 0; $i < count($keyPath); $i++) {
             $currentKey = $keyPath[$i];
-            if (!is_array($resolvableValue) || !$resolvableValue instanceof \ArrayAccess || !isset($resolvableValue[$currentKey])) {
+            if (!is_array($resolvableValue) || !$resolvableValue instanceof ArrayAccess || !isset($resolvableValue[$currentKey])) {
                 $result = $this->resolver->resolve($resolvableValue, null);
 
                 if ($result === null) {
@@ -86,7 +91,7 @@ class Data implements \ArrayAccess, \JsonSerializable
             }
 
             if (!isset($resolvableValue[$currentKey])) {
-                throw new \RuntimeException('Trying to set data into a non-array property: "' . $property . '".');
+                throw new RuntimeException('Trying to set data into a non-array property: "' . $property . '".');
             }
 
             $resolvableValue = & $resolvableValue[$currentKey];
@@ -128,7 +133,7 @@ class Data implements \ArrayAccess, \JsonSerializable
      * Add data in batch from an array
      * @param array $data
      * @param bool $overwrite
-     * @return \Laasti\Lazydata\Data
+     * @return Data
      */
     public function add($data, $overwrite = true)
     {
@@ -146,12 +151,12 @@ class Data implements \ArrayAccess, \JsonSerializable
     public function push($property, $value)
     {
         $data = & $this->get($property);
-        if (is_array($data) || $data instanceof \ArrayAccess) {
+        if (is_array($data) || $data instanceof ArrayAccess) {
             $data[] = $value;
             return $this;
         }
 
-        throw new \RuntimeException('Trying to push data into an undefined or a non-array property: "' . $property . '".');
+        throw new RuntimeException('Trying to push data into an undefined or a non-array property: "' . $property . '".');
     }
 
     /**

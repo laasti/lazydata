@@ -43,7 +43,7 @@ Using filters, you can define your own filter with `setFilter` or use native PHP
         'native_example' => 'strtoupper:test', //I know, it's a stupid example :P
         'closure_example' => 'closure:Test',
     ];
-    $resolver = new \Laasti\Lazydata\FilterResolver;
+    $resolver = new \Laasti\Lazydata\Resolvers\FilterResolver;
     $resolver->setFilter('closure', function($value) {
         return md5($value.'MYSALT');
     });
@@ -60,8 +60,8 @@ With league/container:
 
 //We need to setup the ContainerResolver that comes with the package
 $container = new League\Container\Container;
-$container->add('Laasti\Lazydata\ResolverInterface', 'Laasti\Lazydata\ContainerResolver')->withArgument($container);
-$container->add('Laasti\Lazydata\Data')->withArguments([[], 'Laasti\Lazydata\ResolverInterface']);
+$container->add('Laasti\Lazydata\Resolvers\ResolverInterface', 'Laasti\Lazydata\Resolvers\ContainerResolver')->withArgument($container);
+$container->add('Laasti\Lazydata\Data')->withArguments([[], 'Laasti\Lazydata\Resolvers\ResolverInterface']);
 
 $viewdata = $container->get('Laasti\Lazydata\Data);;
 
