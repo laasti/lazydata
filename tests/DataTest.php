@@ -3,8 +3,14 @@
 
 namespace Laasti\Lazydata\Tests;
 
+use CallableObject;
+use InvokableObject;
 use Laasti\Lazydata\Data;
+use Laasti\Lazydata\IterableData;
+use Laasti\Lazydata\Resolvers\CallableResolver;
 use Laasti\Lazydata\Resolvers\ContainerResolver;
+use Laasti\Lazydata\Resolvers\FilterResolver;
+use Laasti\Lazydata\ResponderData;
 use League\Container\Container;
 /**
  * DataTest Class
@@ -33,8 +39,8 @@ class DataTest extends \PHPUnit_Framework_TestCase
     public function testCallableResolver()
     {
         require 'dummy-callables.php';
-        $obj = new \CallableObject;
-        $inv = new \InvokableObject;
+        $obj = new CallableObject;
+        $inv = new InvokableObject;
         $data = [
             'function' => '=functionCallable',
             'function_array' => ['=functionCallable'],
@@ -143,7 +149,7 @@ class DataTest extends \PHPUnit_Framework_TestCase
                     'closure' => 'closure:Test',
                     'unset'  => 'unset:Test'
                 ];
-                $resolver = new \Laasti\Lazydata\Resolvers\FilterResolver;
+                $resolver = new FilterResolver;
                 $resolver->setFilter('closure', function() {
                     return 'My closure';
                 });
@@ -160,7 +166,7 @@ class DataTest extends \PHPUnit_Framework_TestCase
             public function testInvalidKey()
             {
                 $this->setExpectedException('InvalidArgumentException');
-                $resolver = new \Laasti\Lazydata\Resolvers\FilterResolver;
+                $resolver = new FilterResolver;
                 $resolver->setFilter('bcu&62-', function() {
                     return 'My closure';
                 });
@@ -169,8 +175,42 @@ class DataTest extends \PHPUnit_Framework_TestCase
             public function testInvalidCallable()
             {
                 $this->setExpectedException('InvalidArgumentException');
-                $resolver = new \Laasti\Lazydata\Resolvers\FilterResolver;
+                $resolver = new FilterResolver;
                 $resolver->setFilter('mycallable', 'some_invalid_function');
+            }
+
+            public function testProvider()
+            {
+                $container = new Container;
+                $container->addServiceProvider('Laasti\Lazydata\LazydataProvider');
+
+                $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\FilterResolver') instanceof FilterResolver);
+                $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\ContainerResolver') instanceof ContainerResolver);
+                $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\CallableResolver') instanceof CallableResolver);
+                $this->assertTrue($container->get('Laasti\Lazydata\ResponderData') instanceof ResponderData);
+                $this->assertTrue($container->get('Laasti\Lazydata\Data') instanceof Data);
+                $this->assertTrue($container->get('Laasti\Lazydata\IterableData') instanceof IterableData);
+                $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\ResolverInterface') instanceof ContainerResolver);
+            }
+
+            public function testFilterResolverProvider()
+            {
+                require_once 'dummy-callables.php';
+                $container = new Container;
+                $container->add('config.lazydata.filters', ['data' => '=StaticCallable::get']);
+                $container->addServiceProvider('Laasti\Lazydata\LazydataProvider');
+
+                $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\ResolverInterface') instanceof FilterResolver);
+            }
+
+            public function testCallableResolverProvider()
+            {
+                require_once 'dummy-callables.php';
+                $container = new Container;
+                $container->add('config.lazydata.container', false);
+                $container->addServiceProvider('Laasti\Lazydata\LazydataProvider');
+
+                $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\ResolverInterface') instanceof CallableResolver);
             }
 
         }

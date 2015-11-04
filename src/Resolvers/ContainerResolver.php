@@ -48,26 +48,10 @@ class ContainerResolver implements ResolverInterface
         $callable = $this->getCallable($value);
 
         if (is_array($callable)) {
-            $name = is_array($callable[0]) ? $callable[0][0] : $callable[0];
-            $method = is_array($callable[0]) ? $callable[0][1] : null;
-            $args = isset($callable[1]) ? $callable[1] : [];
-
-            //The $name must
-            if ($this->container->isRegistered($name) || $this->container->isInServiceProvider($name) || isset($this->container[$name])) {
-                $object = $this->container->get($name);
-                //Use reflection to find object
-            } else if (class_exists($name)) {
-                $object = $this->container->get($name);
+            if (is_callable($callable[0])) {
+                return call_user_func_array($callable[0], $callable[1]);
             } else {
-                return $this->fallback->resolve($value, $default);
-            }
-
-            if (!is_null($method) && method_exists($object, $method)) {
-                return call_user_func_array([$object, $method], $args);
-            } elseif (is_callable($object)) {
-                return call_user_func_array($object, $args);
-            } else {
-                return $object;
+                return $callable[0];
             }
         }
 
@@ -80,18 +64,34 @@ class ContainerResolver implements ResolverInterface
      * @param mixed $value
      * @return array|bool The callable with its arguments, or false on fail
      */
-    private function getCallable($value)
+    public function getCallable($value)
     {
         if (is_string($value)) {
-            return $this->validateCallable([strpos($value, '::') ? explode('::', $value) : $value]);
+            $callable = $this->validateCallable([strpos($value, '::') ? explode('::', $value) : $value]);
         } else if (is_array($value) && count($value) === 1 && isset($value[0]) && is_string($value[0])) {
-            return $this->validateCallable([strpos($value[0], '::') ? explode('::', $value[0]) : $value[0]]);
+            $callable = $this->validateCallable([strpos($value[0], '::') ? explode('::', $value[0]) : $value[0]]);
         } else if (is_array($value) && count($value) === 2 && isset($value[0]) && is_string($value[0]) && isset($value[1]) && is_array($value[1])) {
-            return $this->validateCallable([strpos($value[0], '::') ? explode('::', $value[0]) : $value[0], $value[1]]);
+            $callable = $this->validateCallable([strpos($value[0], '::') ? explode('::', $value[0]) : $value[0], $value[1]]);
         } else if (is_array($value) && count($value) === 2 && isset($value[0]) && isset($value[1])) {
-            return $this->validateCallable([$value]);
+            $callable = $this->validateCallable([$value]);
         } else if (is_array($value) && count($value) === 3 && isset($value[0]) && isset($value[1]) && isset($value[2])) {
-            return $this->validateCallable([[$value[0], $value[1]], $value[2]]);
+            $callable = $this->validateCallable([[$value[0], $value[1]], $value[2]]);
+        }
+
+        if (is_array($callable)) {
+            $name = is_array($callable[0]) ? $callable[0][0] : $callable[0];
+            $method = is_array($callable[0]) ? $callable[0][1] : null;
+            $args = isset($callable[1]) ? $callable[1] : [];
+
+            if ($this->container->isRegistered($name) || $this->container->isInServiceProvider($name) || isset($this->container[$name]) || class_exists($name)) {
+                $object = $this->container->get($name);
+                if (is_null($method)) {
+                    return [$object, $args];
+                } else {
+                    return [[$object, $method], $args];
+                }
+            }
+            return false;
         }
         return false;
     }
