@@ -76,6 +76,8 @@ class ContainerResolver implements ResolverInterface
             $callable = $this->validateCallable([$value]);
         } else if (is_array($value) && count($value) === 3 && isset($value[0]) && isset($value[1]) && isset($value[2])) {
             $callable = $this->validateCallable([[$value[0], $value[1]], $value[2]]);
+        } else {
+            $callable = null;
         }
 
         if (is_array($callable)) {
