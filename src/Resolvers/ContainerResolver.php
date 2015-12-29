@@ -85,15 +85,18 @@ class ContainerResolver implements ResolverInterface
             $method = is_array($callable[0]) ? $callable[0][1] : null;
             $args = isset($callable[1]) ? $callable[1] : [];
 
-            if ($this->container->isRegistered($name) || $this->container->isInServiceProvider($name) || isset($this->container[$name]) || class_exists($name)) {
+            if (is_object($name)) {
+                $object = $name;
+            } else if ($this->container->isRegistered($name) || $this->container->isInServiceProvider($name) || isset($this->container[$name]) || class_exists($name)) {
                 $object = $this->container->get($name);
-                if (is_null($method)) {
-                    return [$object, $args];
-                } else {
-                    return [[$object, $method], $args];
-                }
+            } else {
+                return false;
             }
-            return false;
+            if (is_null($method)) {
+                return [$object, $args];
+            } else {
+                return [[$object, $method], $args];
+            }
         }
         return false;
     }
