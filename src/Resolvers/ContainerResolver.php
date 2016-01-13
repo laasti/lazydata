@@ -50,8 +50,6 @@ class ContainerResolver implements ResolverInterface
         if (is_array($callable)) {
             if (is_callable($callable[0])) {
                 return call_user_func_array($callable[0], $callable[1]);
-            } else {
-                return $callable[0];
             }
         }
 
