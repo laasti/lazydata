@@ -50,6 +50,8 @@ class ContainerResolver implements ResolverInterface
         if (is_array($callable)) {
             if (is_callable($callable[0])) {
                 return call_user_func_array($callable[0], $callable[1]);
+            } else {
+                return $callable[0];
             }
         }
 
@@ -104,10 +106,10 @@ class ContainerResolver implements ResolverInterface
         if (is_string($callable[0]) && strpos($callable[0], $this->prefix) === 0) {
             $callable[0] = preg_replace('/^'.$this->prefix.'/', '', $callable[0]);
             return $callable;
-        } elseif (is_array($callable[0]) && is_string($callable[0][0]) && strpos($callable[0][0], $this->prefix) === 0) {
+        } elseif (is_array($callable[0]) && is_string($callable[0][0]) && is_string($callable[0][1]) && strpos($callable[0][0], $this->prefix) === 0) {
             $callable[0][0] = preg_replace('/^'.$this->prefix.'/', '', $callable[0][0]);
             return $callable;
-        } elseif (is_array($callable[0]) && is_object($callable[0][0])) {
+        } elseif (is_array($callable[0]) && is_object($callable[0][0]) && is_string($callable[0][1])) {
             return $callable;
         } elseif (is_object($callable[0])) {
             return $callable;
