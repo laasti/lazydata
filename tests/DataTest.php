@@ -212,7 +212,7 @@ class DataTest extends \PHPUnit_Framework_TestCase
 
                 $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\ResolverInterface') instanceof CallableResolver);
             }
-/*
+
             public function testSaveResolvableData()
             {
                 $viewdata = new Data(['menu' => function() {return new \stdClass();}, 'menus.footer' => function() {return new \stdClass();}]);
@@ -221,5 +221,5 @@ class DataTest extends \PHPUnit_Framework_TestCase
                 $this->assertTrue($viewdata->get('menus.footer') === $viewdata->get('menus.footer'));
                 $this->assertTrue($viewdata->get('menus.footer') === $viewdata->get('menus')->get('footer'));
             }
-*/
+
         }

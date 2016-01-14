@@ -79,24 +79,22 @@ class Data implements ArrayAccess, JsonSerializable
         $end = array_pop($keyPath);
         for ($i = 0; $i < count($keyPath); $i++) {
             $currentKey = $keyPath[$i];
-
+            //$resolvableValue is always an array
             if (!isset($resolvableValue[$currentKey])) {
-                throw new RuntimeException('Trying to set data into a non-array property: "' . $property . '".');
-            }
-            
-            
-            if (!is_array($resolvableValue[$currentKey]) || !$resolvableValue[$currentKey] instanceof ArrayAccess) {
+                $resolvableValue[$currentKey] = [];
+            } else {
                 $uid = uniqid('', true);
                 $result = $this->resolver->resolve($resolvableValue[$currentKey], $uid);
-
-                if ($result !== $uid) {
+                if ($result === $uid && (!is_array($resolvableValue[$currentKey]) &&  !$resolvableValue[$currentKey] instanceof ArrayAccess)) {
+                    throw new RuntimeException('Trying to set data into a non-array property: "' . $property . '".');
+                } else if (is_array($result) || $result instanceof ArrayAccess) {
                     $resolvableValue[$currentKey] = $result;
                 }
+                
             }
-
             $resolvableValue = & $resolvableValue[$currentKey];
         }
-
+        //Must exit the loop with an array
         $resolvableValue[$end] = $value;
 
         return $this;
