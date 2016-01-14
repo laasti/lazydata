@@ -76,22 +76,22 @@ class Data implements ArrayAccess, JsonSerializable
     {
         $keyPath = explode('.', $property);
         $resolvableValue = & $this->data;
-
         $end = array_pop($keyPath);
         for ($i = 0; $i < count($keyPath); $i++) {
             $currentKey = $keyPath[$i];
-            if (!is_array($resolvableValue) || !$resolvableValue instanceof ArrayAccess || !isset($resolvableValue[$currentKey])) {
-                $result = $this->resolver->resolve($resolvableValue, null);
-
-                if ($result === null) {
-                    $resolvableValue[$currentKey] = array();
-                } else {
-                    $resolvableValue[$currentKey] = $result;
-                }
-            }
 
             if (!isset($resolvableValue[$currentKey])) {
                 throw new RuntimeException('Trying to set data into a non-array property: "' . $property . '".');
+            }
+            
+            
+            if (!is_array($resolvableValue[$currentKey]) || !$resolvableValue[$currentKey] instanceof ArrayAccess) {
+                $uid = uniqid('', true);
+                $result = $this->resolver->resolve($resolvableValue[$currentKey], $uid);
+
+                if ($result !== $uid) {
+                    $resolvableValue[$currentKey] = $result;
+                }
             }
 
             $resolvableValue = & $resolvableValue[$currentKey];
