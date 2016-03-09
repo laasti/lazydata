@@ -87,7 +87,7 @@ class ContainerResolver implements ResolverInterface
 
             if (is_object($name)) {
                 $object = $name;
-            } else if ($this->container->isRegistered($name) || $this->container->isInServiceProvider($name) || isset($this->container[$name]) || class_exists($name)) {
+            } else if ($this->container->has($name) || class_exists($name)) {
                 $object = $this->container->get($name);
             } else {
                 return false;
