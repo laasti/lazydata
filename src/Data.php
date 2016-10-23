@@ -29,16 +29,17 @@ class Data implements ArrayAccess, JsonSerializable
     public function get($property, $default = null, $wrapInResolver = true)
     {
         $keyPath = explode('.', $property);
-        $resolvableValue = $this->data;
+        $resolvableValue =& $this->data;
+
         for ($i = 0; $i < count($keyPath); $i++) {
             $currentKey = $keyPath[$i];
             if ((is_array($resolvableValue) || $resolvableValue instanceof ArrayAccess) && isset($resolvableValue[$currentKey])) {
-                $resolvableValue = $resolvableValue[$currentKey];
+                $resolvableValue =& $resolvableValue[$currentKey];
             } else {
                 $random = uniqid('DATA_GET', true);
                 $result = $this->resolver->resolve($resolvableValue, $random);
                 if ((is_array($result) || $result instanceof ArrayAccess) && isset($result[$currentKey])) {
-                    $resolvableValue = $result[$currentKey];
+                    $resolvableValue =& $result[$currentKey];
                 } else {
                     return $default;
                 }

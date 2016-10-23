@@ -85,20 +85,21 @@ class DataTest extends \PHPUnit_Framework_TestCase
                 $this->assertTrue($viewdata->get('dot.notation.closure') === 'notation');
                 $this->assertTrue($viewdata->get('dot.notation.closureValue.value') === 'notationvalue');
             }
-
+/**/
             public function testContainerResolver()
             {
                 require_once 'dummy-callables.php';
                 $container = new Container;
                 $container->add('config_string', 'My config');
                 $container->add('config_array', ['config' => 'oh my']);
-                $container->invokable('my_callable', function() {
+                $container->add('InvokableObject');
+                $container->add('my_callable', function() {
                     return 'invoke callable';
                 });
                 $container->add('some_class', 'CallableObject', true);
-                $provider = $this->getMock('League\Container\ServiceProvider');
+                $provider = $this->getMock('League\Container\ServiceProvider\AbstractServiceProvider');
                 $provider->expects($this->any())->method('provides')->will($this->returnCallback(function($alias) {
-                            return $alias === 'provided_class';
+                            return empty($alias) ? ['provided_class'] : $alias === 'provided_class';
                         }));
                 $provider->expects($this->once())->method('register')->will($this->returnCallback(function() use ($container) {
                             $container->add('provided_class', 'CallableObject');
@@ -118,7 +119,6 @@ class DataTest extends \PHPUnit_Framework_TestCase
                     'provided' => '=provided_class::get',
                     'provided_array' => ['=provided_class', 'get'],
                     'provided_params' => ['=provided_class::get', ['name']],
-                    'reflection' => '=CallableObject::get',
                     'invokable' => ['=InvokableObject', ['name']],
                     'provided_params_array' => ['=provided_class', 'get', ['name']],
                 ];
@@ -138,7 +138,8 @@ class DataTest extends \PHPUnit_Framework_TestCase
                 $this->assertTrue($viewdata->get('provided_array') === 'object default');
                 $this->assertTrue($viewdata->get('provided_params') === 'object name');
                 $this->assertTrue($viewdata->get('provided_params_array') === 'object name');
-                $this->assertTrue($viewdata->get('reflection') === 'object default');
+                //No automatic reflexion in container2
+                //$this->assertTrue($viewdata->get('reflection') === 'object default');
                 $this->assertTrue($viewdata->get('invokable') === 'invoke name');
             }
 
@@ -182,7 +183,8 @@ class DataTest extends \PHPUnit_Framework_TestCase
             public function testProvider()
             {
                 $container = new Container;
-                $container->addServiceProvider('Laasti\Lazydata\LazydataProvider');
+                $container->share('Interop\Container\ContainerInterface', $container);
+                $container->addServiceProvider('Laasti\Lazydata\Providers\LeagueLazydataProvider');
 
                 $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\FilterResolver') instanceof FilterResolver);
                 $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\ContainerResolver') instanceof ContainerResolver);
@@ -197,8 +199,9 @@ class DataTest extends \PHPUnit_Framework_TestCase
             {
                 require_once 'dummy-callables.php';
                 $container = new Container;
-                $container->add('config.lazydata.filters', ['data' => '=StaticCallable::get']);
-                $container->addServiceProvider('Laasti\Lazydata\LazydataProvider');
+                $container->add('config', ['lazydata' => ['filters' => ['data' => '=StaticCallable::get']]]);
+                $container->add('Interop\Container\ContainerInterface', $container);
+                $container->addServiceProvider('Laasti\Lazydata\Providers\LeagueLazydataProvider');
 
                 $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\ResolverInterface') instanceof FilterResolver);
             }
@@ -207,8 +210,9 @@ class DataTest extends \PHPUnit_Framework_TestCase
             {
                 require_once 'dummy-callables.php';
                 $container = new Container;
-                $container->add('config.lazydata.container', false);
-                $container->addServiceProvider('Laasti\Lazydata\LazydataProvider');
+                $container->add('config', ['lazydata' => ['container' => false]]);
+                $container->add('Interop\Container\ContainerInterface', $container);
+                $container->addServiceProvider('Laasti\Lazydata\Providers\LeagueLazydataProvider');
 
                 $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\ResolverInterface') instanceof CallableResolver);
             }
@@ -221,5 +225,5 @@ class DataTest extends \PHPUnit_Framework_TestCase
                 $this->assertTrue($viewdata->get('menus.footer') === $viewdata->get('menus.footer'));
                 $this->assertTrue($viewdata->get('menus.footer') === $viewdata->get('menus')->get('footer'));
             }
-
+/**/
         }

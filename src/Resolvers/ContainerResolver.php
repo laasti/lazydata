@@ -2,7 +2,8 @@
 
 namespace Laasti\Lazydata\Resolvers;
 
-use League\Container\ContainerInterface;
+use Interop\Container\ContainerInterface;
+
 
 /**
  * Resolves lazy loaded callables using league/container
@@ -87,8 +88,10 @@ class ContainerResolver implements ResolverInterface
 
             if (is_object($name)) {
                 $object = $name;
-            } else if ($this->container->has($name) || class_exists($name)) {
+            } else if ($this->container->has($name)) {
                 $object = $this->container->get($name);
+            } else if (is_callable($name.'::'.$method)) {
+                return [$name.'::'.$method, $args];
             } else {
                 return false;
             }

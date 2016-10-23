@@ -39,7 +39,11 @@ class LeagueLazydataProvider extends ServiceProvider\AbstractServiceProvider
         $di = $this->getContainer();
         $config = $this->getConfig();
         $di->add('lazydata.data', $config['data']);
-        $di->add('lazydata.container', $config['container']);
+        if ($config['container']) {
+            $di->add('lazydata.container', $di->get($config['container']));
+        } else {
+            $di->add('lazydata.container', false);
+        }
         $di->add('lazydata.filters', $config['filters']);
         $di->add('lazydata.filter_separator', $config['filter_separator']);
         $di->add('lazydata.prefix', $config['prefix']);
@@ -56,6 +60,7 @@ class LeagueLazydataProvider extends ServiceProvider\AbstractServiceProvider
         $di->add('Laasti\Lazydata\Resolvers\ContainerResolver')->withArguments(['lazydata.container', 'Laasti\Lazydata\Resolvers\CallableResolver', 'lazydata.prefix']);
         $di->add('Laasti\Lazydata\Resolvers\CallableResolver')->withArgument('lazydata.prefix');
         $di->add('Laasti\Lazydata\Data')->withArguments(['lazydata.data', 'Laasti\Lazydata\Resolvers\ResolverInterface']);
+        $di->add('Laasti\Lazydata\ResponderData')->withArguments(['lazydata.data', 'Laasti\Lazydata\Resolvers\ResolverInterface']);
         $di->add('Laasti\Lazydata\IterableData')->withArguments(['lazydata.data', 'Laasti\Lazydata\Resolvers\ResolverInterface']);
 
         $di->add('Laasti\Lazydata\Resolvers\ResolverInterface', function($container, $prefix, $filters, $separator) use ($di) {
@@ -91,10 +96,12 @@ class LeagueLazydataProvider extends ServiceProvider\AbstractServiceProvider
     
     protected function getConfig()
     {
-        $config = $this->getContainer()->get('config');
-        
-        if (isset($config['lazydata'])) {
-            return array_merge($this->defaultConfig, $config['lazydata']);
+        if ($this->getContainer()->has('config')) {
+            $config = $this->getContainer()->get('config');
+
+            if (isset($config['lazydata'])) {
+                return array_merge($this->defaultConfig, $config['lazydata']);
+            }
         }
         
         return $this->defaultConfig;
