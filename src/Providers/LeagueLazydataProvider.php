@@ -15,7 +15,6 @@ class LeagueLazydataProvider extends ServiceProvider\AbstractServiceProvider
         'Laasti\Lazydata\Resolvers\CallableResolver',
         'Laasti\Lazydata\Resolvers\ContainerResolver',
         'Laasti\Lazydata\Resolvers\FilterResolver',
-        'Laasti\Lazydata\ResponderData',
         'Laasti\Lazydata\Data',
         'Laasti\Lazydata\IterableData',
         'lazydata.data',
@@ -60,7 +59,6 @@ class LeagueLazydataProvider extends ServiceProvider\AbstractServiceProvider
         $di->add('Laasti\Lazydata\Resolvers\ContainerResolver')->withArguments(['lazydata.container', 'Laasti\Lazydata\Resolvers\CallableResolver', 'lazydata.prefix']);
         $di->add('Laasti\Lazydata\Resolvers\CallableResolver')->withArgument('lazydata.prefix');
         $di->add('Laasti\Lazydata\Data')->withArguments(['lazydata.data', 'Laasti\Lazydata\Resolvers\ResolverInterface']);
-        $di->add('Laasti\Lazydata\ResponderData')->withArguments(['lazydata.data', 'Laasti\Lazydata\Resolvers\ResolverInterface']);
         $di->add('Laasti\Lazydata\IterableData')->withArguments(['lazydata.data', 'Laasti\Lazydata\Resolvers\ResolverInterface']);
 
         $di->add('Laasti\Lazydata\Resolvers\ResolverInterface', function($container, $prefix, $filters, $separator) use ($di) {
