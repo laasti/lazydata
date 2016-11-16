@@ -189,7 +189,7 @@ class DataTest extends \PHPUnit_Framework_TestCase
                 $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\FilterResolver') instanceof FilterResolver);
                 $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\ContainerResolver') instanceof ContainerResolver);
                 $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\CallableResolver') instanceof CallableResolver);
-                $this->assertTrue($container->get('Laasti\Lazydata\ResponderData') instanceof ResponderData);
+                //$this->assertTrue($container->get('Laasti\Lazydata\ResponderData') instanceof ResponderData);
                 $this->assertTrue($container->get('Laasti\Lazydata\Data') instanceof Data);
                 $this->assertTrue($container->get('Laasti\Lazydata\IterableData') instanceof IterableData);
                 $this->assertTrue($container->get('Laasti\Lazydata\Resolvers\ResolverInterface') instanceof ContainerResolver);
