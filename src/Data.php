@@ -30,14 +30,14 @@ class Data implements ArrayAccess, JsonSerializable
     {
         $keyPath = explode('.', $property);
         $resolvableValue =& $this->data;
-
+        
         for ($i = 0; $i < count($keyPath); $i++) {
             $currentKey = $keyPath[$i];
             if ((is_array($resolvableValue) || $resolvableValue instanceof ArrayAccess) && isset($resolvableValue[$currentKey])) {
                 $resolvableValue =& $resolvableValue[$currentKey];
             } else {
                 $random = uniqid('DATA_GET', true);
-                $result = $this->resolver->resolve($resolvableValue, $random);
+                $result = $this->resolver->resolve($resolvableValue, $random);                
                 if ((is_array($result) || $result instanceof ArrayAccess) && isset($result[$currentKey])) {
                     $resolvableValue =& $result[$currentKey];
                 } else {
@@ -49,7 +49,7 @@ class Data implements ArrayAccess, JsonSerializable
         $resolvableValue = $this->resolver->resolve($resolvableValue);
 
         //Create a new resolver in case of nested lazydata
-        if (is_array($resolvableValue) || $resolvableValue instanceof ArrayAccess) {
+        if (!$resolvableValue instanceof Data && (is_array($resolvableValue) || $resolvableValue instanceof ArrayAccess )) {
             $class = __CLASS__;
             $i = 0;
             $isAssoc = false;
