@@ -39,11 +39,13 @@ class FilterResolver implements ResolverInterface
      * @param string $separator
      * @param ResolverInterface $fallback
      */
-    public function __construct($separator = ':',
-            ResolverInterface $fallback = null)
-    {
+    public function __construct(
+        $separator = ':',
+        ResolverInterface $fallback = null
+    ) {
+
         $this->separator = $separator;
-        $this->fallback = $fallback ? : new CallableResolver('=');
+        $this->fallback = $fallback ?: new CallableResolver('=');
     }
 
     /**
@@ -54,10 +56,12 @@ class FilterResolver implements ResolverInterface
     public function resolve($value, $default = 'value')
     {
         $matches = [];
-        if (is_string($value) && preg_match('/^('.self::KEY_REGEX.')'.  preg_quote($this->separator).'(.*)/', $value, $matches)) {
+        if (is_string($value) && preg_match('/^(' . self::KEY_REGEX . ')' . preg_quote($this->separator) . '(.*)/',
+                $value, $matches)
+        ) {
             if (isset($this->filters[$matches[1]])) {
                 return call_user_func_array($this->filters[$matches[1]], [$matches[2]]);
-            } else if (function_exists($matches[1])) {
+            } elseif (function_exists($matches[1])) {
                 return call_user_func_array($matches[1], [$matches[2]]);
             }
         }
@@ -75,16 +79,15 @@ class FilterResolver implements ResolverInterface
     public function setFilter($key, $callable)
     {
         if (!is_callable($callable)) {
-            throw new InvalidArgumentException('Invalid callable for filter: "'.$key.'"');
+            throw new InvalidArgumentException('Invalid callable for filter: "' . $key . '"');
         }
-        if (!preg_match('/^'.self::KEY_REGEX.'$/', $key)) {
-            throw new InvalidArgumentException('Invalid name for filter: "'.$key.'". The filter name can only contain alphanumeric characters and underscore.');
+        if (!preg_match('/^' . self::KEY_REGEX . '$/', $key)) {
+            throw new InvalidArgumentException('Invalid name for filter: "' . $key . '". The filter name can only contain alphanumeric characters and underscore.');
         }
 
         $this->filters[$key] = $callable;
 
         return $this;
-
     }
 
     /**
@@ -100,5 +103,4 @@ class FilterResolver implements ResolverInterface
 
         return $this;
     }
-
 }
