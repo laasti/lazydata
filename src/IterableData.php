@@ -2,7 +2,7 @@
 
 namespace Laasti\Lazydata;
 
-class IterableData extends Data implements  \IteratorAggregate
+class IterableData extends Data implements \IteratorAggregate
 {
     public function getIterator()
     {

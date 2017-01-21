@@ -1,111 +1,81 @@
-# Laasti/Lazydata
+# Laasti / Lazydata
 
-Provides lazy loading of data to views. Dot notation can be used.
+[![Latest Version on Packagist][ico-version]][link-packagist]
+[![Software License][ico-license]](LICENSE.md)
+[![Build Status][ico-travis]][link-travis]
+[![Coverage Status][ico-scrutinizer]][link-scrutinizer]
+[![Quality Score][ico-code-quality]][link-code-quality]
+[![Total Downloads][ico-downloads]][link-downloads]
 
-## Installation
+This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what
+PSRs you support to avoid any confusion with users and contributors.
+
+## Structure
+
+If any of the following are applicable to your project, then the directory structure should follow industry best practises by being named the following.
 
 ```
-composer require laasti/lazydata
+bin/        
+config/
+src/
+tests/
+vendor/
+```
+
+
+## Install
+
+Via Composer
+
+``` bash
+$ composer require laasti/lazydata
 ```
 
 ## Usage
 
-All PHP callables are supported. To pass arguments to calls, use an array like ['my_callable', [/* args here */]].
-
-Without League\Container:
-
-```php
-
-$data = [
-    'title' => 'render_title',
-    'with_arguments' => ['=my_callable', [/* args here */]],
-    'with_class' => ['=my_class', 'my_function'], //or '=my_class::my_function',
-    'with_object' => [$object, 'my_function'],
-    'meta' => function() {
-        return [
-            'description' => 'My description'
-        ]
-    }
-];
-
-$viewdata = new Laasti\Lazydata\Data($data);
-$viewdata->set('username', function() {return 'George';});
-
-//You can use dot notation within the lazy loaded data
-$viewdata->get('meta.description'); //Returns 'My description'
-
+``` php
+$skeleton = new League\Skeleton();
+echo $skeleton->echoPhrase('Hello, League!');
 ```
 
-Using filters, you can define your own filter with `setFilter` or use native PHP functions that take one string argument.
+## Change log
 
-```php
-    $data = [
-        'native_example' => 'strtoupper:test', //I know, it's a stupid example :P
-        'closure_example' => 'closure:Test',
-    ];
-    $resolver = new \Laasti\Lazydata\Resolvers\FilterResolver;
-    $resolver->setFilter('closure', function($value) {
-        return md5($value.'MYSALT');
-    });
-    $viewdata = new Laasti\Lazydata\Data($data, $resolver);
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
-    $viewdata->get('native_example'); //Returns 'TEST'
-    $viewdata->get('closure_example'); //Returns '56e29f03228697ad59822c71eb4d7750'
+## Testing
 
+``` bash
+$ composer test
 ```
-
-With league/container:
-
-```php
-
-//We need to setup the ContainerResolver that comes with the package
-$container = new League\Container\Container;
-$container->add('Laasti\Lazydata\Resolvers\ResolverInterface', 'Laasti\Lazydata\Resolvers\ContainerResolver')->withArgument($container);
-$container->add('Laasti\Lazydata\Data')->withArguments([[], 'Laasti\Lazydata\Resolvers\ResolverInterface']);
-
-$viewdata = $container->get('Laasti\Lazydata\Data);;
-
-$container->add('container_key', 'some value');
-
-$viewdata->set('viewdata_key', '=container_key');
-$viewdata->get('viewdata_key'); //Returns 'some value'
-
-//Returns the value from SomeClass->myMethod();, SomeClass is resolved with the container
-$viewdata->set('viewdata_callable_key', '=SomeClass::myMethod');
-$viewdata->get('viewdata_callable_key');
-
-//Returns the value from SomeClass->myMethod('George'); SomeClass is resolved with the container
-$viewdata->set('viewdata_callable_args_key', ['=SomeClass::myMethod', ['George']]);
-$viewdata->get('viewdata_callable_args_key');
-
-```
-
-The ContainerResolver falls back on the default resolver if it cannot resolve the call.
-
-> **Note:**
-> Does not work with league/container invokables. It is a limitation due to the way registered callables are stored,
-> there is no way to check if a callable is registered to the container in the public API.
 
 ## Contributing
 
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
+Please see [CONTRIBUTING](CONTRIBUTING.md) and [CONDUCT](CONDUCT.md) for details.
 
-## History
+## Security
 
-See CHANGELOG.md for more information.
+If you discover any security related issues, please email contact@nebulousweb.com instead of using the issue tracker.
 
 ## Credits
 
-Author: Sonia Marquette (@nebulousGirl)
+- [Sonia Marquette][link-author]
+- [All Contributors][link-contributors]
 
 ## License
 
-Released under the MIT License. See LICENSE.txt file.
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
+[ico-version]: https://img.shields.io/packagist/v/laasti/lazydata.svg?style=flat-square
+[ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
+[ico-travis]: https://img.shields.io/travis/laasti/lazydata/master.svg?style=flat-square
+[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/laasti/lazydata.svg?style=flat-square
+[ico-code-quality]: https://img.shields.io/scrutinizer/g/laasti/lazydata.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/laasti/lazydata.svg?style=flat-square
 
-
-
+[link-packagist]: https://packagist.org/packages/laasti/lazydata
+[link-travis]: https://travis-ci.org/laasti/lazydata
+[link-scrutinizer]: https://scrutinizer-ci.com/g/laasti/lazydata/code-structure
+[link-code-quality]: https://scrutinizer-ci.com/g/laasti/lazydata
+[link-downloads]: https://packagist.org/packages/laasti/lazydata
+[link-author]: https://github.com/nebulousGirl
+[link-contributors]: ../../contributors

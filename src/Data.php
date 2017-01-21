@@ -7,6 +7,7 @@ use JsonSerializable;
 use Laasti\Lazydata\Resolvers\CallableResolver;
 use Laasti\Lazydata\Resolvers\ResolverInterface;
 use RuntimeException;
+
 /**
  * Data Class
  *
@@ -19,8 +20,30 @@ class Data implements ArrayAccess, JsonSerializable
 
     public function __construct($initialData = [], ResolverInterface $resolver = null)
     {
-        $this->resolver = $resolver ? : new CallableResolver;
+        $this->resolver = $resolver ?: new CallableResolver;
         $this->add($initialData);
+    }
+
+    /**
+     * Add data in batch from an array
+     * @param array $data
+     * @param bool $overwrite
+     * @return Data
+     */
+    public function add($data, $overwrite = true)
+    {
+        foreach ($data as $property => $value) {
+            if ($overwrite || !$this->offsetExists($property)) {
+                $this->set($property, $value);
+            }
+        }
+        return $this;
+    }
+
+    public function offsetExists($property)
+    {
+        $random = uniqid('DATA', true);
+        return $this->get($property, $random) !== $random;
     }
 
     /**
@@ -30,14 +53,14 @@ class Data implements ArrayAccess, JsonSerializable
     {
         $keyPath = explode('.', $property);
         $resolvableValue =& $this->data;
-        
+
         for ($i = 0; $i < count($keyPath); $i++) {
             $currentKey = $keyPath[$i];
             if ((is_array($resolvableValue) || $resolvableValue instanceof ArrayAccess) && isset($resolvableValue[$currentKey])) {
                 $resolvableValue =& $resolvableValue[$currentKey];
             } else {
                 $random = uniqid('DATA_GET', true);
-                $result = $this->resolver->resolve($resolvableValue, $random);                
+                $result = $this->resolver->resolve($resolvableValue, $random);
                 if ((is_array($result) || $result instanceof ArrayAccess) && isset($result[$currentKey])) {
                     $resolvableValue =& $result[$currentKey];
                 } else {
@@ -49,7 +72,7 @@ class Data implements ArrayAccess, JsonSerializable
         $resolvableValue = $this->resolver->resolve($resolvableValue);
 
         //Create a new resolver in case of nested lazydata
-        if (!$resolvableValue instanceof Data && (is_array($resolvableValue) || $resolvableValue instanceof ArrayAccess )) {
+        if (!$resolvableValue instanceof Data && (is_array($resolvableValue) || $resolvableValue instanceof ArrayAccess)) {
             $class = __CLASS__;
             $i = 0;
             $isAssoc = false;
@@ -76,7 +99,7 @@ class Data implements ArrayAccess, JsonSerializable
     public function set($property, $value)
     {
         $keyPath = explode('.', $property);
-        $resolvableValue = & $this->data;
+        $resolvableValue = &$this->data;
         $end = array_pop($keyPath);
         for ($i = 0; $i < count($keyPath); $i++) {
             $currentKey = $keyPath[$i];
@@ -86,14 +109,13 @@ class Data implements ArrayAccess, JsonSerializable
             } else {
                 $uid = uniqid('', true);
                 $result = $this->resolver->resolve($resolvableValue[$currentKey], $uid);
-                if ($result === $uid && (!is_array($resolvableValue[$currentKey]) &&  !$resolvableValue[$currentKey] instanceof ArrayAccess)) {
+                if ($result === $uid && (!is_array($resolvableValue[$currentKey]) && !$resolvableValue[$currentKey] instanceof ArrayAccess)) {
                     throw new RuntimeException('Trying to set data into a non-array property: "' . $property . '".');
-                } else if (is_array($result) || $result instanceof ArrayAccess) {
+                } elseif (is_array($result) || $result instanceof ArrayAccess) {
                     $resolvableValue[$currentKey] = $result;
                 }
-                
             }
-            $resolvableValue = & $resolvableValue[$currentKey];
+            $resolvableValue = &$resolvableValue[$currentKey];
         }
         //Must exit the loop with an array
         $resolvableValue[$end] = $value;
@@ -104,52 +126,9 @@ class Data implements ArrayAccess, JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public function remove($property)
-    {
-
-        $data = & $this->data;
-        $keyPath = explode('.', $property);
-
-        if (1 === count($keyPath)) {
-            unset($data[$property]);
-            return $this;
-        }
-
-        $end = array_pop($keyPath);
-        for ($i = 0; $i < count($keyPath); $i++) {
-            $currentKey = & $keyPath[$i];
-            if (!isset($data[$currentKey])) {
-                return $this;
-            }
-            $currentValue = & $currentValue[$currentKey];
-        }
-        unset($currentValue[$end]);
-
-        return $this;
-    }
-
-    /**
-     * Add data in batch from an array
-     * @param array $data
-     * @param bool $overwrite
-     * @return Data
-     */
-    public function add($data, $overwrite = true)
-    {
-        foreach ($data as $property => $value) {
-            if ($overwrite || !$this->offsetExists($property)) {
-                $this->set($property, $value);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function push($property, $value)
     {
-        $data = & $this->get($property);
+        $data = &$this->get($property);
         if (is_array($data) || $data instanceof ArrayAccess) {
             $data[] = $value;
             return $this;
@@ -176,12 +155,6 @@ class Data implements ArrayAccess, JsonSerializable
         return $data;
     }
 
-    public function offsetExists($property)
-    {
-        $random = uniqid('DATA', true);
-        return $this->get($property, $random) !== $random;
-    }
-
     public function offsetSet($property, $value)
     {
         $this->set($property, $value);
@@ -190,6 +163,33 @@ class Data implements ArrayAccess, JsonSerializable
     public function offsetUnset($property)
     {
         $this->remove($property);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function remove($property)
+    {
+
+        $data = &$this->data;
+        $keyPath = explode('.', $property);
+
+        if (1 === count($keyPath)) {
+            unset($data[$property]);
+            return $this;
+        }
+
+        $end = array_pop($keyPath);
+        for ($i = 0; $i < count($keyPath); $i++) {
+            $currentKey = &$keyPath[$i];
+            if (!isset($data[$currentKey])) {
+                return $this;
+            }
+            $currentValue = &$currentValue[$currentKey];
+        }
+        unset($currentValue[$end]);
+
+        return $this;
     }
 
     public function offsetGet($property)
@@ -227,5 +227,4 @@ class Data implements ArrayAccess, JsonSerializable
 
         return $exportData;
     }
-
 }

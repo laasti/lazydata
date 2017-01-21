@@ -29,20 +29,19 @@ class CallableResolver implements ResolverInterface
         $callable = $this->getCallable($value);
 
         if (is_array($callable) && is_callable($callable[0])) {
-
             if (count($callable) === 1) {
                 return call_user_func($callable[0]);
             } else {
                 return call_user_func_array($callable[0], $callable[1]);
             }
         }
-        
+
         return $default === 'value' ? $value : $default;
     }
 
     /**
      * Attempts to find a callable and return an array [$callable (, array $arguments)]
-     * 
+     *
      * @param type $value
      * @return array Returns an array [$callable (, array $arguments)], or false when not a callable
      */
@@ -66,10 +65,12 @@ class CallableResolver implements ResolverInterface
     private function validateCallable($callable)
     {
         if (is_string($callable[0]) && strpos($callable[0], $this->prefix) === 0) {
-            $callable[0] = preg_replace('/^'.$this->prefix.'/', '', $callable[0]);
+            $callable[0] = preg_replace('/^' . $this->prefix . '/', '', $callable[0]);
             return $callable;
-        } elseif (is_array($callable[0]) && isset($callable[0][0]) && is_string($callable[0][0]) && strpos($callable[0][0], $this->prefix) === 0) {
-            $callable[0][0] = preg_replace('/^'.$this->prefix.'/', '', $callable[0][0]);
+        } elseif (is_array($callable[0]) && isset($callable[0][0]) && is_string($callable[0][0]) && strpos($callable[0][0],
+                $this->prefix) === 0
+        ) {
+            $callable[0][0] = preg_replace('/^' . $this->prefix . '/', '', $callable[0][0]);
             return $callable;
         } elseif (is_array($callable[0]) && isset($callable[0][0]) && is_object($callable[0][0])) {
             return $callable;
@@ -79,5 +80,4 @@ class CallableResolver implements ResolverInterface
 
         return false;
     }
-
 }

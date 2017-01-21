@@ -4,7 +4,6 @@ namespace Laasti\Lazydata\Resolvers;
 
 use Interop\Container\ContainerInterface;
 
-
 /**
  * Resolves lazy loaded callables using league/container
  *
@@ -31,12 +30,15 @@ class ContainerResolver implements ResolverInterface
      * @param ContainerInterface $container
      * @param ResolverInterface $fallback
      */
-    public function __construct(ContainerInterface $container,
-            ResolverInterface $fallback = null, $prefix = '=')
-    {
+    public function __construct(
+        ContainerInterface $container,
+        ResolverInterface $fallback = null,
+        $prefix = '='
+    ) {
+
         $this->container = $container;
         $this->prefix = $prefix;
-        $this->fallback = $fallback ? : new CallableResolver($prefix);
+        $this->fallback = $fallback ?: new CallableResolver($prefix);
     }
 
     /**
@@ -69,13 +71,16 @@ class ContainerResolver implements ResolverInterface
     {
         if (is_string($value)) {
             $callable = $this->validateCallable([strpos($value, '::') ? explode('::', $value) : $value]);
-        } else if (is_array($value) && count($value) === 1 && isset($value[0]) && is_string($value[0])) {
+        } elseif (is_array($value) && count($value) === 1 && isset($value[0]) && is_string($value[0])) {
             $callable = $this->validateCallable([strpos($value[0], '::') ? explode('::', $value[0]) : $value[0]]);
-        } else if (is_array($value) && count($value) === 2 && isset($value[0]) && is_string($value[0]) && isset($value[1]) && is_array($value[1])) {
-            $callable = $this->validateCallable([strpos($value[0], '::') ? explode('::', $value[0]) : $value[0], $value[1]]);
-        } else if (is_array($value) && count($value) === 2 && isset($value[0]) && isset($value[1])) {
+        } elseif (is_array($value) && count($value) === 2 && isset($value[0]) && is_string($value[0]) && isset($value[1]) && is_array($value[1])) {
+            $callable = $this->validateCallable([
+                strpos($value[0], '::') ? explode('::', $value[0]) : $value[0],
+                $value[1]
+            ]);
+        } elseif (is_array($value) && count($value) === 2 && isset($value[0]) && isset($value[1])) {
             $callable = $this->validateCallable([$value]);
-        } else if (is_array($value) && count($value) === 3 && isset($value[0]) && isset($value[1]) && isset($value[2])) {
+        } elseif (is_array($value) && count($value) === 3 && isset($value[0]) && isset($value[1]) && isset($value[2])) {
             $callable = $this->validateCallable([[$value[0], $value[1]], $value[2]]);
         } else {
             $callable = null;
@@ -88,10 +93,10 @@ class ContainerResolver implements ResolverInterface
 
             if (is_object($name)) {
                 $object = $name;
-            } else if ($this->container->has($name)) {
+            } elseif ($this->container->has($name)) {
                 $object = $this->container->get($name);
-            } else if (is_callable($name.'::'.$method)) {
-                return [$name.'::'.$method, $args];
+            } elseif (is_callable($name . '::' . $method)) {
+                return [$name . '::' . $method, $args];
             } else {
                 return false;
             }
@@ -107,10 +112,12 @@ class ContainerResolver implements ResolverInterface
     private function validateCallable($callable)
     {
         if (is_string($callable[0]) && strpos($callable[0], $this->prefix) === 0) {
-            $callable[0] = preg_replace('/^'.$this->prefix.'/', '', $callable[0]);
+            $callable[0] = preg_replace('/^' . $this->prefix . '/', '', $callable[0]);
             return $callable;
-        } elseif (is_array($callable[0]) && is_string($callable[0][0]) && is_string($callable[0][1]) && strpos($callable[0][0], $this->prefix) === 0) {
-            $callable[0][0] = preg_replace('/^'.$this->prefix.'/', '', $callable[0][0]);
+        } elseif (is_array($callable[0]) && is_string($callable[0][0]) && is_string($callable[0][1]) && strpos($callable[0][0],
+                $this->prefix) === 0
+        ) {
+            $callable[0][0] = preg_replace('/^' . $this->prefix . '/', '', $callable[0][0]);
             return $callable;
         } elseif (is_array($callable[0]) && is_object($callable[0][0]) && is_string($callable[0][1])) {
             return $callable;

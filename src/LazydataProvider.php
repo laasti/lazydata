@@ -28,7 +28,7 @@ class LazyDataProvider extends ServiceProvider
             $di->add('config.lazydata.data', []);
         }
         if (!$di->isSingleton('config.lazydata.container') && !$di->isRegistered('config.lazydata.container')) {
-            $di->add('config.lazydata.container', function() use ($di) {
+            $di->add('config.lazydata.container', function () use ($di) {
                 return $di->get('League\Container\ContainerInterface');
             });
         }
@@ -42,7 +42,7 @@ class LazyDataProvider extends ServiceProvider
             $di->add('config.lazydata.prefix', '=');
         }
 
-        $di->add('Laasti\Lazydata\Resolvers\FilterResolver', function($filters, $separator, $fallback = null) {
+        $di->add('Laasti\Lazydata\Resolvers\FilterResolver', function ($filters, $separator, $fallback = null) {
             $fallback = $fallback ?: new CallableResolver;
             $resolver = new FilterResolver($separator ?: ':', $fallback);
             foreach ($filters as $key => $callable) {
@@ -51,13 +51,26 @@ class LazyDataProvider extends ServiceProvider
             return $resolver;
         })->withArguments(['config.lazydata.filters', 'config.lazydata.filter_separator']);
 
-        $di->add('Laasti\Lazydata\Resolvers\ContainerResolver')->withArguments(['config.lazydata.container', 'Laasti\Lazydata\Resolvers\CallableResolver', 'config.lazydata.prefix']);
+        $di->add('Laasti\Lazydata\Resolvers\ContainerResolver')->withArguments([
+            'config.lazydata.container',
+            'Laasti\Lazydata\Resolvers\CallableResolver',
+            'config.lazydata.prefix'
+        ]);
         $di->add('Laasti\Lazydata\Resolvers\CallableResolver')->withArgument('config.lazydata.prefix');
-        $di->add('Laasti\Lazydata\ResponderData')->withArguments(['config.lazydata.data', 'Laasti\Lazydata\Resolvers\ResolverInterface']);
-        $di->add('Laasti\Lazydata\Data')->withArguments(['config.lazydata.data', 'Laasti\Lazydata\Resolvers\ResolverInterface']);
-        $di->add('Laasti\Lazydata\IterableData')->withArguments(['config.lazydata.data', 'Laasti\Lazydata\Resolvers\ResolverInterface']);
+        $di->add('Laasti\Lazydata\ResponderData')->withArguments([
+            'config.lazydata.data',
+            'Laasti\Lazydata\Resolvers\ResolverInterface'
+        ]);
+        $di->add('Laasti\Lazydata\Data')->withArguments([
+            'config.lazydata.data',
+            'Laasti\Lazydata\Resolvers\ResolverInterface'
+        ]);
+        $di->add('Laasti\Lazydata\IterableData')->withArguments([
+            'config.lazydata.data',
+            'Laasti\Lazydata\Resolvers\ResolverInterface'
+        ]);
 
-        $di->add('Laasti\Lazydata\Resolvers\ResolverInterface', function($container, $prefix, $filters, $separator) {
+        $di->add('Laasti\Lazydata\Resolvers\ResolverInterface', function ($container, $prefix, $filters, $separator) {
             $callable = new CallableResolver($prefix);
             if ($container instanceof ContainerInterface && count($filters)) {
                 $containerResolver = new ContainerResolver($container, $callable, $prefix);
@@ -71,17 +84,22 @@ class LazyDataProvider extends ServiceProvider
                     }
                     $resolver->setFilter($key, $callable);
                 }
-            } else if ($container instanceof ContainerInterface) {
+            } elseif ($container instanceof ContainerInterface) {
                 $resolver = new ContainerResolver($container, $callable, $prefix);
-            } else if (count($filters)) {
+            } elseif (count($filters)) {
                 $resolver = new FilterResolver($separator, $callable);
                 foreach ($filters as $key => $callable) {
                     $resolver->setFilter($key, $callable);
-                }                
+                }
             } else {
                 $resolver = $callable;
             }
             return $resolver;
-        })->withArguments(['config.lazydata.container', 'config.lazydata.prefix', 'config.lazydata.filters', 'config.lazydata.filter_separator']);
+        })->withArguments([
+            'config.lazydata.container',
+            'config.lazydata.prefix',
+            'config.lazydata.filters',
+            'config.lazydata.filter_separator'
+        ]);
     }
 }
