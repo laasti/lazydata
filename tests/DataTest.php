@@ -97,7 +97,7 @@ class DataTest extends \PHPUnit_Framework_TestCase
                     return 'invoke callable';
                 });
                 $container->add('some_class', 'CallableObject', true);
-                $provider = $this->getMock('League\Container\ServiceProvider\AbstractServiceProvider');
+                $provider = $this->createMock('League\Container\ServiceProvider\AbstractServiceProvider');
                 $provider->expects($this->any())->method('provides')->will($this->returnCallback(function($alias) {
                             return empty($alias) ? ['provided_class'] : $alias === 'provided_class';
                         }));

@@ -12,7 +12,8 @@
     },
     "require-dev": {
         "league/container": "~2.0.3",
-        "laasti/response": "~1.2"
+        "laasti/response": "~1.2",
+        "phpunit/phpunit": "^5.7"
     },
     "suggest": {
     },
