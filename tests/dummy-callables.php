@@ -13,6 +13,11 @@ class StaticCallable
         return 'static '.$name;
     }
 
+    public static function getArray()
+    {
+        return [0,1];
+    }
+
 }
 
 class CallableObject

@@ -33,7 +33,11 @@ class CallableResolver implements ResolverInterface
             if (count($callable) === 1) {
                 return call_user_func($callable[0]);
             } else {
-                return call_user_func_array($callable[0], $callable[1]);
+                $params = [];
+                foreach ($callable[1] as $param) {
+                    $params[] = $this->resolve($param);
+                }
+                return call_user_func_array($callable[0], $params);
             }
         }
         

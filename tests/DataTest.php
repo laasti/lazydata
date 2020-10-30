@@ -48,6 +48,7 @@ class DataTest extends \PHPUnit_Framework_TestCase
             'static_short' => '=StaticCallable::get',
             'static_short_array' => ['=StaticCallable::get'],
             'static_short_param' => ['=StaticCallable::get', ['my name']],
+            'sub_callable' => ['=count', ['=StaticCallable::getArray']],
             'static' => ['=StaticCallable', 'get', ['my name']],
             'object' => [$obj, 'get'],
             'object_direct' => $obj,
@@ -84,6 +85,7 @@ class DataTest extends \PHPUnit_Framework_TestCase
                 $this->assertTrue($viewdata->get('closure') === 'Closure');
                 $this->assertTrue($viewdata->get('dot.notation.closure') === 'notation');
                 $this->assertTrue($viewdata->get('dot.notation.closureValue.value') === 'notationvalue');
+                $this->assertTrue($viewdata->get('sub_callable') === 2);
             }
 /**/
             public function testContainerResolver()
